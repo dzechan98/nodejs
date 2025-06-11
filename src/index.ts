@@ -2,7 +2,6 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import routes from "./routes";
 import config from "./config";
-import { notFoundHandler, errorHandler } from "./middleware/errorMiddleware";
 
 const app: Express = express();
 
@@ -22,9 +21,6 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 app.use("/api", routes);
-
-app.use(notFoundHandler);
-app.use(errorHandler);
 
 app.listen(config.port, () => {
   console.log(`⚡️ Server is running at http://localhost:${config.port}`);
