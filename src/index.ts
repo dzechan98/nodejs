@@ -3,6 +3,7 @@ import cors from "cors";
 import routes from "./routes";
 import config from "./config";
 import connectDB from "./config/database";
+import errorHandler from "./middleware/errorHandler";
 
 const app: Express = express();
 
@@ -24,6 +25,8 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 app.use("/api", routes);
+
+app.use(errorHandler);
 
 app.listen(config.port, () => {
   console.log(`⚡️ Server is running at http://localhost:${config.port}`);
