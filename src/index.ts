@@ -2,8 +2,11 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import routes from "./routes";
 import config from "./config";
+import connectDB from "./config/database";
 
 const app: Express = express();
+
+connectDB();
 
 app.use(
   cors({
