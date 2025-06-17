@@ -1,88 +1,83 @@
 import { Request, Response } from "express";
-import Book, { IBook } from "../models/Book";
-import Genre from "../models/Genre";
+import * as bookService from "../services/bookService";
+import { IBookQuery } from "../services/bookService";
 
 export const createBook = async (req: Request, res: Response) => {
   try {
-    const { name, description, imageUrl, genre, author, publicationYear } =
-      req.body;
-    const genreExists = await Genre.findById(genre);
-    if (!genreExists) {
-      res.status(400).json({ message: "Genre not found" });
-      return;
-    }
-    const newBook: IBook = new Book({
-      name,
-      description,
-      imageUrl,
-      genre,
-      author,
-      publicationYear,
-    });
-    await newBook.save();
+    const newBook = await bookService.createNewBook(req.body);
     res.status(201).json(newBook);
-  } catch (error) {
-    res.status(500).json({ message: "Error creating book", error });
+  } catch (error: any) {
+    if (error.message === "Genre not found") {
+      res.status(400).json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error creating book", error: error.message });
+    }
   }
 };
 
 export const getBooks = async (req: Request, res: Response) => {
   try {
-    const books = await Book.find().populate("genre");
-    res.status(200).json(books);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching books", error });
+    const queryParams: IBookQuery = req.query;
+    const result = await bookService.getAllBooks(queryParams);
+    res.status(200).json(result);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Error fetching books", error: error.message });
   }
 };
 
 export const getBookById = async (req: Request, res: Response) => {
   try {
-    const book = await Book.findById(req.params.id).populate("genre");
-    if (!book) {
-      res.status(404).json({ message: "Book not found" });
-      return;
-    }
+    const book = await bookService.getBookDetails(req.params.id);
     res.status(200).json(book);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching book", error });
+  } catch (error: any) {
+    if (error.message === "Book not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error fetching book", error: error.message });
+    }
   }
 };
 
 export const updateBook = async (req: Request, res: Response) => {
   try {
-    const { name, description, imageUrl, genre, author, publicationYear } =
-      req.body;
-    if (genre) {
-      const genreExists = await Genre.findById(genre);
-      if (!genreExists) {
-        res.status(400).json({ message: "Genre not found" });
-        return;
-      }
-    }
-    const updatedBook = await Book.findByIdAndUpdate(
+    const updatedBook = await bookService.updateExistingBook(
       req.params.id,
-      { name, description, imageUrl, genre, author, publicationYear },
-      { new: true, runValidators: true }
-    ).populate("genre");
-    if (!updatedBook) {
-      res.status(404).json({ message: "Book not found" });
-      return;
-    }
+      req.body
+    );
     res.status(200).json(updatedBook);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating book", error });
+  } catch (error: any) {
+    if (
+      error.message === "Book not found" ||
+      error.message === "Genre not found"
+    ) {
+      res
+        .status(error.message === "Book not found" ? 404 : 400)
+        .json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error updating book", error: error.message });
+    }
   }
 };
 
 export const deleteBook = async (req: Request, res: Response) => {
   try {
-    const deletedBook = await Book.findByIdAndDelete(req.params.id);
-    if (!deletedBook) {
-      res.status(404).json({ message: "Book not found" });
-      return;
+    const result = await bookService.deleteExistingBook(req.params.id);
+    res.status(200).json(result);
+  } catch (error: any) {
+    if (error.message === "Book not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error deleting book", error: error.message });
     }
-    res.status(200).json({ message: "Book deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting book", error });
   }
 };

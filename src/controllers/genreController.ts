@@ -1,66 +1,74 @@
 import { Request, Response } from "express";
-import Genre, { IGenre } from "../models/Genre";
+import * as genreService from "../services/genreService";
+import { IGenreQuery } from "../services/genreService";
 
 export const createGenre = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
-    const newGenre: IGenre = new Genre({ name });
-    await newGenre.save();
+    const newGenre = await genreService.createNewGenre(req.body);
     res.status(201).json(newGenre);
-  } catch (error) {
-    res.status(500).json({ message: "Error creating genre", error });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Error creating genre", error: error.message });
   }
 };
 
 export const getGenres = async (req: Request, res: Response) => {
   try {
-    const genres = await Genre.find();
-    res.status(200).json(genres);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching genres", error });
+    const queryParams: IGenreQuery = req.query;
+    const result = await genreService.getAllGenres(queryParams);
+    res.status(200).json(result);
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ message: "Error fetching genres", error: error.message });
   }
 };
 
 export const getGenreById = async (req: Request, res: Response) => {
   try {
-    const genre = await Genre.findById(req.params.id);
-    if (!genre) {
-      res.status(404).json({ message: "Genre not found" });
-      return;
-    }
+    const genre = await genreService.getGenreDetails(req.params.id);
     res.status(200).json(genre);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching genre", error });
+  } catch (error: any) {
+    if (error.message === "Genre not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error fetching genre", error: error.message });
+    }
   }
 };
 
 export const updateGenre = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
-    const updatedGenre = await Genre.findByIdAndUpdate(
+    const updatedGenre = await genreService.updateExistingGenre(
       req.params.id,
-      { name },
-      { new: true, runValidators: true }
+      req.body
     );
-    if (!updatedGenre) {
-      res.status(404).json({ message: "Genre not found" });
-      return;
-    }
     res.status(200).json(updatedGenre);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating genre", error });
+  } catch (error: any) {
+    if (error.message === "Genre not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error updating genre", error: error.message });
+    }
   }
 };
 
 export const deleteGenre = async (req: Request, res: Response) => {
   try {
-    const deletedGenre = await Genre.findByIdAndDelete(req.params.id);
-    if (!deletedGenre) {
-      res.status(404).json({ message: "Genre not found" });
-      return;
+    const result = await genreService.deleteExistingGenre(req.params.id);
+    res.status(200).json(result);
+  } catch (error: any) {
+    if (error.message === "Genre not found") {
+      res.status(404).json({ message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ message: "Error deleting genre", error: error.message });
     }
-    res.status(200).json({ message: "Genre deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting genre", error });
   }
 };

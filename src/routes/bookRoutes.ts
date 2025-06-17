@@ -7,15 +7,36 @@ import {
   deleteBook,
 } from "../controllers/bookController";
 import { protect, authorize } from "../middleware/authMiddleware";
+import {
+  createBookValidator,
+  getBooksValidator,
+  getBookByIdValidator,
+  updateBookValidator,
+  deleteBookValidator,
+} from "../validators/bookValidators";
 
 const router = Router();
 
-router.route("/").post(protect, authorize("admin"), createBook).get(getBooks);
+router.post("/", protect, authorize("admin"), createBookValidator, createBook);
 
-router
-  .route("/:id")
-  .get(getBookById)
-  .put(protect, authorize("admin"), updateBook)
-  .delete(protect, authorize("admin"), deleteBook);
+router.get("/", getBooksValidator, getBooks);
+
+router.get("/:id", getBookByIdValidator, getBookById);
+
+router.put(
+  "/:id",
+  protect,
+  authorize("admin"),
+  updateBookValidator,
+  updateBook
+);
+
+router.delete(
+  "/:id",
+  protect,
+  authorize("admin"),
+  deleteBookValidator,
+  deleteBook
+);
 
 export default router;

@@ -7,15 +7,42 @@ import {
   deleteGenre,
 } from "../controllers/genreController";
 import { protect, authorize } from "../middleware/authMiddleware";
+import {
+  createGenreValidator,
+  getGenresValidator,
+  getGenreByIdValidator,
+  updateGenreValidator,
+  deleteGenreValidator,
+} from "../validators/genreValidators";
 
 const router = Router();
 
-router.route("/").post(protect, authorize("admin"), createGenre).get(getGenres);
+router.post(
+  "/",
+  protect,
+  authorize("admin"),
+  createGenreValidator,
+  createGenre
+);
 
-router
-  .route("/:id")
-  .get(getGenreById)
-  .put(protect, authorize("admin"), updateGenre)
-  .delete(protect, authorize("admin"), deleteGenre);
+router.get("/", getGenresValidator, getGenres);
+
+router.get("/:id", getGenreByIdValidator, getGenreById);
+
+router.put(
+  "/:id",
+  protect,
+  authorize("admin"),
+  updateGenreValidator,
+  updateGenre
+);
+
+router.delete(
+  "/:id",
+  protect,
+  authorize("admin"),
+  deleteGenreValidator,
+  deleteGenre
+);
 
 export default router;
