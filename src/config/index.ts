@@ -8,6 +8,7 @@ interface IConfig {
   corsOrigin: string;
   mongoUrl: string;
   jwtSecret: string;
+  swaggerBaseUrl: string;
 }
 
 const config: IConfig = {
@@ -16,6 +17,9 @@ const config: IConfig = {
   corsOrigin: process.env.CORS_ORIGIN || "*",
   mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/mydatabase",
   jwtSecret: process.env.JWT_SECRET || "averysecretkey",
+  swaggerBaseUrl:
+    process.env.SWAGGER_BASE_URL ||
+    `http://localhost:${process.env.PORT || 3000}`,
 };
 
 export default config;

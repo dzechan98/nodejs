@@ -4,6 +4,8 @@ import routes from "./routes";
 import config from "./config";
 import connectDB from "./config/database";
 import errorHandler from "./middleware/errorHandler";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger";
 
 const app: Express = express();
 
@@ -25,6 +27,7 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 app.use("/api", routes);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(errorHandler);
 
