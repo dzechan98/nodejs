@@ -1,71 +1,15 @@
 import express, { Router } from "express";
-import {
-  registerUser,
-  loginUser,
-  getAllUsers,
-  getUserById,
-} from "../controllers/userController";
+import { getAllUsers, getUserById } from "../controllers/userController";
 import { protect, authorize } from "../middleware/authMiddleware";
-import {
-  registerUserValidator,
-  loginUserValidator,
-  getUserByIdValidator,
-} from "../validators/userValidators";
+import { getUserByIdValidator } from "../validators/userValidators";
 
 const router: Router = express.Router();
 
 /**
  * @swagger
- * /api/users/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/UserRegister'
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Invalid input
- */
-router.post("/register", registerUserValidator, registerUser);
-
-/**
- * @swagger
- * /api/users/login:
- *   post:
- *     summary: Login a user
- *     tags: [Users]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/UserLogin'
- *     responses:
- *       200:
- *         description: User logged in successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *       400:
- *         description: Invalid credentials
- */
-router.post("/login", loginUserValidator, loginUser);
-
-/**
- * @swagger
  * /api/users:
  *   get:
- *     summary: Get all users
+ *     summary: Get all users (Admin only)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -87,7 +31,7 @@ router.get("/", protect, authorize("admin"), getAllUsers);
  * @swagger
  * /api/users/{id}:
  *   get:
- *     summary: Get a user by ID
+ *     summary: Get a user by ID (Protected)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
